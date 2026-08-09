@@ -174,6 +174,112 @@ typedef struct
     BYTE         Value;
 } PHEADER_DEFAULT_SUBCODE, * LPPHEADER_DEFAULT_SUBCODE;
 
+#pragma pack(push, 1)
+typedef struct
+{
+    PBMSG_HEADER Header;
+    BYTE SubCode;
+    BYTE ProtocolVersion;
+    DWORD ServerUnixTime;
+    BYTE BloodCastleState;
+    DWORD BloodCastleSeconds;
+    BYTE DevilSquareState;
+    DWORD DevilSquareSeconds;
+    BYTE ChaosCastleState;
+    DWORD ChaosCastleSeconds;
+} PMSG_EVENT_SCHEDULE, * LPPMSG_EVENT_SCHEDULE;
+
+typedef struct
+{
+    PBMSG_HEADER Header;
+    BYTE SubCode;
+    BYTE ProtocolVersion;
+    BYTE Filter;
+    BYTE Count;
+    BYTE RecordLength;
+} PMSG_CHARACTER_RANKING_HEADER, * LPPMSG_CHARACTER_RANKING_HEADER;
+
+typedef struct
+{
+    char Name[10];
+    BYTE CharacterClass;
+    WORD Level;
+    WORD Resets;
+    WORD MasterLevel;
+} PMSG_CHARACTER_RANKING_ENTRY, * LPPMSG_CHARACTER_RANKING_ENTRY;
+
+typedef struct
+{
+    PBMSG_HEADER Header;
+    BYTE SubCode;
+    BYTE ProtocolVersion;
+    BYTE Flags;
+    WORD CurrentLevel;
+    WORD RequiredLevel;
+    WORD CurrentResets;
+    WORD NextReset;
+    WORD ResetLimit;
+    DWORD CurrentZen;
+    DWORD RequiredZen;
+    DWORD RewardPoints;
+    WORD CurrentItems;
+    WORD RequiredItems;
+    char ItemName[32];
+} PMSG_RESET_REQUIREMENTS, * LPPMSG_RESET_REQUIREMENTS;
+
+typedef struct
+{
+    PBMSG_HEADER Header;
+    BYTE SubCode;
+    BYTE ProtocolVersion;
+    WORD MapNumber;
+    BYTE Count;
+} PMSG_MAP_QUEST_LIST_HEADER, * LPPMSG_MAP_QUEST_LIST_HEADER;
+
+typedef struct
+{
+    WORD Group;
+    WORD Number;
+} PMSG_MAP_QUEST_LIST_ENTRY, * LPPMSG_MAP_QUEST_LIST_ENTRY;
+
+typedef struct
+{
+    PBMSG_HEADER Header;
+    BYTE SubCode;
+    BYTE ProtocolVersion;
+    BYTE Count;
+    BYTE RecordLength;
+} PMSG_MONSTER_STATUS_HEADER, * LPPMSG_MONSTER_STATUS_HEADER;
+
+typedef struct
+{
+    WORD Id;
+    WORD Level;
+    DWORD CurrentHealth;
+    DWORD MaximumHealth;
+} PMSG_MONSTER_STATUS_ENTRY, * LPPMSG_MONSTER_STATUS_ENTRY;
+
+typedef struct
+{
+    PWMSG_HEADER Header;
+    BYTE SubCode;
+    BYTE Index;
+    BYTE Count;
+    BYTE MinimumCharacterStatus;
+    BYTE ParameterCount;
+    char Command[32];
+    char Name[48];
+    char Description[256];
+} PMSG_AVAILABLE_CHAT_COMMAND, * LPPMSG_AVAILABLE_CHAT_COMMAND;
+#pragma pack(pop)
+
+static_assert(sizeof(PMSG_RESET_REQUIREMENTS) == 64);
+static_assert(sizeof(PMSG_MAP_QUEST_LIST_HEADER) == 8);
+static_assert(sizeof(PMSG_MAP_QUEST_LIST_ENTRY) == 4);
+static_assert(sizeof(PMSG_MONSTER_STATUS_HEADER) == 7);
+static_assert(sizeof(PMSG_MONSTER_STATUS_ENTRY) == 12);
+static_assert(sizeof(PMSG_AVAILABLE_CHAT_COMMAND) == 345);
+
 //receive Character List
 typedef struct
 {

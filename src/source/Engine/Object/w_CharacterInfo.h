@@ -210,6 +210,9 @@ public:
     float       Run;
     float       HealthStatus;
     float       ShieldStatus;
+    WORD        MonsterLevel;
+    DWORD       MonsterHealth;
+    DWORD       MonsterMaxHealth;
 
     vec3_t		TargetPosition;
     vec3_t      Light;

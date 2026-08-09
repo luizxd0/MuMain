@@ -24,6 +24,21 @@ using Pipelines.Sockets.Unofficial;
 public unsafe partial class ConnectionManager
 {
     /// <summary>
+    /// Idle time, in seconds, before the OS starts sending TCP keep-alive probes.
+    /// </summary>
+    private const int KeepAliveIdleSeconds = 4;
+
+    /// <summary>
+    /// Interval, in seconds, between TCP keep-alive probes.
+    /// </summary>
+    private const int KeepAliveIntervalSeconds = 2;
+
+    /// <summary>
+    /// Number of unanswered keep-alive probes before the connection is dropped.
+    /// </summary>
+    private const int KeepAliveRetryCount = 3;
+
+    /// <summary>
     /// The currently active connections, with their handle as key.
     /// </summary>
     private static readonly Dictionary<int, ConnectionWrapper> Connections = new();
@@ -147,21 +162,6 @@ public unsafe partial class ConnectionManager
 
         return handle;
     }
-
-    /// <summary>
-    /// Idle time, in seconds, before the OS starts sending TCP keep-alive probes.
-    /// </summary>
-    private const int KeepAliveIdleSeconds = 4;
-
-    /// <summary>
-    /// Interval, in seconds, between TCP keep-alive probes.
-    /// </summary>
-    private const int KeepAliveIntervalSeconds = 2;
-
-    /// <summary>
-    /// Number of unanswered keep-alive probes before the connection is dropped.
-    /// </summary>
-    private const int KeepAliveRetryCount = 3;
 
     /// <summary>
     /// Enables aggressive TCP keep-alive so the OS detects dead or half-open

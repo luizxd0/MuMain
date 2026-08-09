@@ -12931,4 +12931,217 @@
   <data name="DefaultFont" xml:space="preserve">
     <value>Default</value>
   </data>
+  <data name="Server Menu" xml:space="preserve">
+    <value>Server Menu</value>
+  </data>
+  <data name="Quests" xml:space="preserve">
+    <value>Quests</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="Events" xml:space="preserve">
+    <value>Events</value>
+  </data>
+  <data name="Rankings" xml:space="preserve">
+    <value>Rankings</value>
+  </data>
+  <data name="Offline Level" xml:space="preserve">
+    <value>Offline Level</value>
+  </data>
+  <data name="Choose a service" xml:space="preserve">
+    <value>Choose a service</value>
+  </data>
+  <data name="Event Guide" xml:space="preserve">
+    <value>Event Guide</value>
+  </data>
+  <data name="Event times are announced automatically" xml:space="preserve">
+    <value>Event times are announced automatically.</value>
+  </data>
+  <data name="Blood Castle entry" xml:space="preserve">
+    <value>Blood Castle: speak to the Archangel Messenger.</value>
+  </data>
+  <data name="Devil Square entry" xml:space="preserve">
+    <value>Devil Square: speak to Charon.</value>
+  </data>
+  <data name="Chaos Castle entry" xml:space="preserve">
+    <value>Chaos Castle: use an Armor of Guardsman.</value>
+  </data>
+  <data name="Ranking Center" xml:space="preserve">
+    <value>Ranking Center</value>
+  </data>
+  <data name="More ranking categories require server support" xml:space="preserve">
+    <value>More ranking categories require server support.</value>
+  </data>
+  <data name="Open Gens Ranking" xml:space="preserve">
+    <value>Open Gens Ranking</value>
+  </data>
+  <data name="Reset Center" xml:space="preserve">
+    <value>Reset Center</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Check Requirements" xml:space="preserve">
+    <value>Check Requirements</value>
+  </data>
+  <data name="Reset Character" xml:space="preserve">
+    <value>Reset Character</value>
+  </data>
+  <data name="Reset Stats" xml:space="preserve">
+    <value>Reset Stats</value>
+  </data>
+  <data name="Reset requirements appear in the system chat" xml:space="preserve">
+    <value>Requirements and rewards appear in system chat.</value>
+  </data>
+  <data name="Loading reset requirements" xml:space="preserve">
+    <value>Loading reset requirements...</value>
+  </data>
+  <data name="Reset system unavailable" xml:space="preserve">
+    <value>The reset system is unavailable.</value>
+  </data>
+  <data name="Next reset" xml:space="preserve">
+    <value>Next reset</value>
+  </data>
+  <data name="Reset limit" xml:space="preserve">
+    <value>Reset limit</value>
+  </data>
+  <data name="Unlimited" xml:space="preserve">
+    <value>Unlimited</value>
+  </data>
+  <data name="Required level" xml:space="preserve">
+    <value>Required level</value>
+  </data>
+  <data name="Required Zen" xml:space="preserve">
+    <value>Required Zen</value>
+  </data>
+  <data name="Reward points" xml:space="preserve">
+    <value>Reward points</value>
+  </data>
+  <data name="Required item" xml:space="preserve">
+    <value>Required item</value>
+  </data>
+  <data name="Ready to reset" xml:space="preserve">
+    <value>All requirements met - ready to reset</value>
+  </data>
+  <data name="Requirements not met" xml:space="preserve">
+    <value>Complete the missing requirements to reset</value>
+  </data>
+  <data name="Click the same action again to confirm" xml:space="preserve">
+    <value>Click the same action again to confirm.</value>
+  </data>
+  <data name="Offline Leveling" xml:space="preserve">
+    <value>Offline Leveling</value>
+  </data>
+  <data name="Offline leveling uses your current MU Helper setup" xml:space="preserve">
+    <value>Uses your current MU Helper settings on this map.</value>
+  </data>
+  <data name="Offline leveling disconnect warning" xml:space="preserve">
+    <value>Activation disconnects this client while the server plays.</value>
+  </data>
+  <data name="Offline leveling login stop" xml:space="preserve">
+    <value>Your next login stops the offline character automatically.</value>
+  </data>
+  <data name="MU Helper Settings" xml:space="preserve">
+    <value>MU Helper Settings</value>
+  </data>
+  <data name="Start MU Helper" xml:space="preserve">
+    <value>Start MU Helper</value>
+  </data>
+  <data name="MU Helper is running" xml:space="preserve">
+    <value>MU Helper is running.</value>
+  </data>
+  <data name="MU Helper is stopped" xml:space="preserve">
+    <value>MU Helper is stopped.</value>
+  </data>
+  <data name="Activate Offline Level" xml:space="preserve">
+    <value>Activate Offline Level</value>
+  </data>
+  <data name="Command Center" xml:space="preserve">
+    <value>Command Center</value>
+  </data>
+  <data name="Move Menu" xml:space="preserve">
+    <value>Move Menu</value>
+  </data>
+  <data name="Clear PK Status" xml:space="preserve">
+    <value>Clear PK Status</value>
+  </data>
+  <data name="Open Warehouse" xml:space="preserve">
+    <value>Open Warehouse</value>
+  </data>
+  <data name="Available Commands" xml:space="preserve">
+    <value>Available Commands</value>
+  </data>
+  <data name="Commands available to this character" xml:space="preserve">
+    <value>Commands available to this character</value>
+  </data>
+  <data name="Loading commands" xml:space="preserve">
+    <value>Loading available commands...</value>
+  </data>
+  <data name="No commands available" xml:space="preserve">
+    <value>No commands are available to this character.</value>
+  </data>
+  <data name="The server validates access and costs" xml:space="preserve">
+    <value>The server validates access, requirements, and costs.</value>
+  </data>
+  <data name="Live event schedule from server" xml:space="preserve">
+    <value>Live opening times from the server.</value>
+  </data>
+  <data name="Loading event schedule" xml:space="preserve">
+    <value>Loading schedule...</value>
+  </data>
+  <data name="Schedule unavailable" xml:space="preserve">
+    <value>Schedule unavailable</value>
+  </data>
+  <data name="Entrance is open" xml:space="preserve">
+    <value>Entrance is open now</value>
+  </data>
+  <data name="Starts in" xml:space="preserve">
+    <value>Starts in</value>
+  </data>
+  <data name="Resets" xml:space="preserve">
+    <value>Resets</value>
+  </data>
+  <data name="Player" xml:space="preserve">
+    <value>Player</value>
+  </data>
+  <data name="Loading ranking" xml:space="preserve">
+    <value>Loading ranking...</value>
+  </data>
+  <data name="No ranking entries" xml:space="preserve">
+    <value>No characters found.</value>
+  </data>
+  <data name="Enter character name" xml:space="preserve">
+    <value>Enter the character name to clear PK status:</value>
+  </data>
+  <data name="Character name is required" xml:space="preserve">
+    <value>Character name is required.</value>
+  </data>
+  <data name="Quest tracker title" xml:space="preserve">
+    <value>Quests - %ls</value>
+  </data>
+  <data name="No active quests for this map" xml:space="preserve">
+    <value>No active quests for this map</value>
+  </data>
+  <data name="All quests title" xml:space="preserve">
+    <value>All Quests</value>
+  </data>
+  <data name="Quest tracker all" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Quest tracker this map" xml:space="preserve">
+    <value>This Map</value>
+  </data>
+  <data name="No active quests" xml:space="preserve">
+    <value>No active quests</value>
+  </data>
+  <data name="Loading quest objective" xml:space="preserve">
+    <value>Loading objective...</value>
+  </data>
+  <data name="Monster level and health" xml:space="preserve">
+    <value>Level %u  |  HP %u/%u</value>
+  </data>
+  <data name="Monster level and unknown health" xml:space="preserve">
+    <value>Level %u  |  HP --</value>
+  </data>
 </root>

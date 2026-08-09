@@ -373,7 +373,7 @@ file(MAKE_DIRECTORY "${MU_NUGET_CACHE_DIR}")
 # same package the .NET ClientLibrary consumes (see MUnique.Client.Library.csproj).
 # Sourcing from NuGet means a single versioned dependency instead of vendoring
 # the entire OpenMU repository as a submodule.
-set(OPENMU_PACKETS_VERSION "0.9.9" CACHE STRING
+set(OPENMU_PACKETS_VERSION "0.9.10" CACHE STRING
     "Version of MUnique.OpenMU.Network.Packets to source packet XML from")
 set(OPENMU_PACKETS_XML
     "${MU_NUGET_CACHE_DIR}/munique.openmu.network.packets/${OPENMU_PACKETS_VERSION}/contentFiles/any/net10.0/ServerToClient/ServerToClientPackets.xml")
@@ -577,6 +577,7 @@ if (DOTNET_EXECUTABLE)
 
   # 2. Tell CMake to watch ALL .cs files in the ClientLibrary folder
   file(GLOB_RECURSE DOTNET_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/*.cs")
+  list(FILTER DOTNET_SOURCES EXCLUDE REGEX "/(bin|obj)/")
 
   # 3. Build to temp directory with Native AOT, then copy to build and bin directories
   # Override environment variables to avoid issues with umlauts in Windows username
@@ -649,6 +650,7 @@ if (DOTNET_EXECUTABLE)
   mu_native_path("${CONSTANTS_REPLACER_PROJ}" CONSTANTS_REPLACER_PROJ_NATIVE)
   mu_native_path("${CMAKE_BINARY_DIR}/ConstantsReplacer" CONSTANTS_REPLACER_OUTDIR_NATIVE)
   file(GLOB_RECURSE CONSTANTS_REPLACER_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/*.cs")
+  list(FILTER CONSTANTS_REPLACER_SOURCES EXCLUDE REGEX "/(bin|obj)/")
   set(CONSTANTS_REPLACER_OUTPUT "${CMAKE_BINARY_DIR}/ConstantsReplacer/ConstantsReplacer.exe")
 
   add_custom_command(
@@ -672,6 +674,7 @@ if (DOTNET_EXECUTABLE)
 
   file(GLOB RESX_FILES CONFIGURE_DEPENDS "${RESX_INPUT_DIR}/*.resx")
   file(GLOB_RECURSE RESXGEN_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../tools/ResxGen/*.cs")
+  list(FILTER RESXGEN_SOURCES EXCLUDE REGEX "/(bin|obj)/")
 
   if (RESX_FILES)
     # Compute groups from filenames: Editor.en.resx -> group "Editor".

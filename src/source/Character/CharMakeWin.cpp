@@ -7,6 +7,7 @@
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Core/GlobalUBO.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -484,6 +485,17 @@ void CCharMakeWin::RenderCreateCharacter()
     g_Camera.FOV = 10.f;
     MoveCharacterCamera(CharacterView.Object.Position, Position, Angle);
 
+    // Character creation is rendered from inside the character scene's bitmap
+    // pass. End that pass and preserve the underlying scene matrices before the
+    // preview switches GlobalUBO to a perspective projection. EndOpengl() no
+    // longer owns a fixed-function matrix stack, so these matrices must be
+    // restored explicitly before the remaining 2D controls are rendered.
+    EndBitmap();
+    float previousProjection[16];
+    float previousView[16];
+    memcpy(previousProjection, GlobalUBO::Instance().GetProj(), sizeof(previousProjection));
+    memcpy(previousView, GlobalUBO::Instance().GetView(), sizeof(previousView));
+
     BeginOpengl(m_winBack.GetXPos() / g_fScreenRate_x, m_winBack.GetYPos() / g_fScreenRate_y, 410 / g_fScreenRate_x, 335 / g_fScreenRate_y);
 
     const ClassRenderParameters params = GetRenderParameters(CharacterView.Class);
@@ -502,4 +514,7 @@ void CCharMakeWin::RenderCreateCharacter()
     glViewport2(0, 0, WindowWidth, WindowHeight);
 
     EndOpengl();
+    GlobalUBO::Instance().SetProj(previousProjection);
+    GlobalUBO::Instance().SetView(previousView);
+    BeginBitmap();
 }

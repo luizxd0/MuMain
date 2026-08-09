@@ -97,6 +97,8 @@ protected:
 
     DWordList				m_listQuestIndexByEtc;
     DWordList				m_listCurQuestIndex;
+    DWordList               m_listMapQuestIndex;
+    bool                    m_bMapQuestIndexListReady;
 
 public:
     CQuestMng();
@@ -136,6 +138,10 @@ public:
     void AddCurQuestIndexList(DWORD dwQuestIndex);
     void RemoveCurQuestIndexList(DWORD dwQuestIndex);
     bool IsIndexInCurQuestIndexList(DWORD dwQuestIndex);
+    std::vector<DWORD> GetCurQuestIndexList() const;
+    void SetMapQuestIndexList(const DWORD* questIndices, int indexCount);
+    void ClearMapQuestIndexList();
+    bool IsQuestVisibleOnCurrentMap(DWORD questIndex) const;
 
 protected:
     void LoadNPCDialogueScript();

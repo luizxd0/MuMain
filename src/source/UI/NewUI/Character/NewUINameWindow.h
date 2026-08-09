@@ -22,6 +22,7 @@ namespace SEASON3B
         void Release();
 
         void SetPos(int x, int y);
+        void ShowQuestTracker();
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -38,8 +39,20 @@ namespace SEASON3B
 
         bool m_bShowItemName;
         bool m_bShowMonsterHealthBar;
+        bool m_bQuestTrackerVisible;
+        bool m_bQuestTrackerExpanded;
+        bool m_bQuestTrackerMapOnly;
+        bool m_bQuestTrackerDragging;
+        POINT m_QuestTrackerPosition;
+        POINT m_QuestTrackerDragOffset;
+        int m_iQuestTrackerScroll;
+        DWORD m_dwQuestTrackerLastRefresh;
+        DWORD m_dwMonsterStatusLastRefresh;
+        int m_iQuestTrackerWorld;
 
-        void RenderMonsterHealthBars();
+        void RenderMonsterOverlays();
+        void RenderQuestTracker();
+        void RefreshQuestTracker(bool refreshMapFilter);
     };
 }
 

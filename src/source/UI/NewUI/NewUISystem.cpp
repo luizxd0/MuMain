@@ -79,6 +79,7 @@ CNewUISystem::CNewUISystem()
     m_pNewBattleSoccerScore = nullptr;
     m_pNewCommandWindow = nullptr;
     m_pNewWindowMenu = nullptr;
+    m_pNewServerMenu = nullptr;
     m_pNewOptionWindow = nullptr;
     m_pNewHeroPositionInfo = nullptr;
     m_pNewHelpWindow = nullptr;
@@ -341,6 +342,15 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
     }
 
+    m_pNewServerMenu = std::make_unique<CNewUIServerMenu>();
+    if (m_pNewServerMenu->Create(
+            m_pNewUIMng,
+            (640 - CNewUIServerMenu::WindowWidth) / 2,
+            (480 - CNewUIServerMenu::WindowHeight) / 2) == false)
+    {
+        return false;
+    }
+
     m_pNewHeroPositionInfo = new CNewUIHeroPositionInfo;
     if (m_pNewHeroPositionInfo->Create(m_pNewUIMng, 0, 0) == false)
     {
@@ -538,6 +548,7 @@ void CNewUISystem::UnloadMainSceneInterface()
     SAFE_DELETE(m_pNewItemExplanationWindow);
     SAFE_DELETE(m_pNewSetItemExplanation);
     SAFE_DELETE(m_pNewQuickCommandWindow);
+    m_pNewServerMenu.reset();
     SAFE_DELETE(m_pNewWindowMenu);
     SAFE_DELETE(m_pNewBattleSoccerScore);
     SAFE_DELETE(m_pNewCatapultWindow);
@@ -912,6 +923,11 @@ void CNewUISystem::Show(DWORD dwKey)
     {
         g_pWindowMenu->OpenningProcess();
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_WINDOW, true);
+    }
+    else if (dwKey == INTERFACE_SERVER_MENU)
+    {
+        HideAllGroupA();
+        m_pNewServerMenu->OpeningProcess();
     }
     else if (dwKey == INTERFACE_SENATUS)
     {
@@ -1390,6 +1406,10 @@ void CNewUISystem::Hide(DWORD dwKey)
     {
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_WINDOW, false);
     }
+    else if (dwKey == INTERFACE_SERVER_MENU)
+    {
+        m_pNewServerMenu->ClosingProcess();
+    }
     else if (dwKey == INTERFACE_OPTION)
     {
     }
@@ -1807,16 +1827,23 @@ bool CNewUISystem::CheckKeyUse()
     return false;
 }
 
-bool CNewUISystem::HandleFrameCornerClose(const POINT& winPos, DWORD dwKey)
+bool CNewUISystem::HandleFrameCornerClose(const POINT& winPos, DWORD dwKey, int frameWidth)
 {
     // Box of the corner glyph in the shared 190-wide frame. Matches the MU Helper
     // close "X" exactly (13x12 anchored at +169,+7) — the same hit-box the
     // per-window copies used originally, so the click feel is identical across
     // every window. One place to tune for every window that uses this frame.
-    constexpr int X_OFFSET = 169, Y_OFFSET = 7, WIDTH = 13, HEIGHT = 12;
+    constexpr int BaseWidth = 190;
+    constexpr int BaseXOffset = 169;
+    constexpr int YOffset = 7;
+    constexpr int BaseHitWidth = 13;
+    constexpr int Height = 12;
+    const int xOffset = (BaseXOffset * frameWidth) / BaseWidth;
+    const int scaledHitWidth = (BaseHitWidth * frameWidth) / BaseWidth;
+    const int hitWidth = scaledHitWidth > BaseHitWidth ? scaledHitWidth : BaseHitWidth;
 
     if (IsPress(VK_LBUTTON)
-        && CheckMouseIn(winPos.x + X_OFFSET, winPos.y + Y_OFFSET, WIDTH, HEIGHT))
+        && CheckMouseIn(winPos.x + xOffset, winPos.y + YOffset, hitWidth, Height))
     {
         Hide(dwKey);
         // Clear the raw button state: world movement reads MouseLButtonPush
@@ -2264,6 +2291,16 @@ CNewUICommandWindow* CNewUISystem::GetUI_NewCommandWindow() const
 CNewUIWindowMenu* CNewUISystem::GetUI_NewWindowMenu() const
 {
     return m_pNewWindowMenu;
+}
+
+CNewUIServerMenu* CNewUISystem::GetUI_NewServerMenu() const
+{
+    return m_pNewServerMenu.get();
+}
+
+CNewUINameWindow* CNewUISystem::GetUI_NewNameWindow() const
+{
+    return m_pNewNameWindow;
 }
 
 CNewUIOptionWindow* CNewUISystem::GetUI_NewOptionWindow() const

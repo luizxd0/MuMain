@@ -24,6 +24,7 @@ CQuestMng::CQuestMng()
 {
     m_nNPCIndex = 0;
     m_szNPCName = nullptr;
+    m_bMapQuestIndexListReady = false;
 }
 
 CQuestMng::~CQuestMng()
@@ -920,4 +921,36 @@ bool CQuestMng::IsIndexInCurQuestIndexList(DWORD dwQuestIndex)
     }
 
     return false;
+}
+
+std::vector<DWORD> CQuestMng::GetCurQuestIndexList() const
+{
+    return std::vector<DWORD>(m_listCurQuestIndex.begin(), m_listCurQuestIndex.end());
+}
+
+void CQuestMng::SetMapQuestIndexList(const DWORD* questIndices, int indexCount)
+{
+    m_listMapQuestIndex.clear();
+    if (questIndices != nullptr)
+    {
+        for (int index = 0; index < indexCount; ++index)
+            m_listMapQuestIndex.push_back(questIndices[index]);
+    }
+
+    m_bMapQuestIndexListReady = true;
+}
+
+void CQuestMng::ClearMapQuestIndexList()
+{
+    m_listMapQuestIndex.clear();
+    m_bMapQuestIndexListReady = false;
+}
+
+bool CQuestMng::IsQuestVisibleOnCurrentMap(DWORD questIndex) const
+{
+    if (!m_bMapQuestIndexListReady)
+        return true;
+
+    return std::find(m_listMapQuestIndex.begin(), m_listMapQuestIndex.end(), questIndex)
+        != m_listMapQuestIndex.end();
 }

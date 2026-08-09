@@ -11,6 +11,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/NewUI/NewUI3DRenderMng.h"
 #include "UI/NewUI/Widgets/NewUIButton.h"
+#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
 
 namespace SEASON3B
 {
@@ -242,6 +243,7 @@ namespace SEASON3B
         void RenderExperience();
         void RenderHotKeyItemCount();
         void RenderButtons();
+        void RenderServerMenuButton();
         void RenderCharInfoButton();
         void RenderFriendButton();
         void RenderFriendButtonState();
@@ -269,6 +271,7 @@ namespace SEASON3B
         CNewUIButton m_BtnMyInven;
         CNewUIButton m_BtnFriend;
         CNewUIButton m_BtnWindow;
+        CNewUIButton m_BtnServerMenu;
 
         bool m_bButtonBlink;
     };

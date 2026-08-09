@@ -31,6 +31,21 @@
 #include "GameShop/InGameShopSystem.h"
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
+namespace
+{
+    constexpr int ServerMenuButtonX = REFERENCE_WIDTH - 72;
+    constexpr int ServerMenuButtonY = 7;
+    constexpr int ServerMenuButtonWidth = 64;
+    constexpr int ServerMenuButtonHeight = 23;
+
+    void RenderHudRectangle(float x, float y, float width, float height, float red, float green, float blue, float alpha)
+    {
+        glColor4f(red, green, blue, alpha);
+        RenderColor(x, y, width, height);
+        EndRenderColor();
+    }
+}
+
 SEASON3B::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
 {
     m_bExpEffect = false;
@@ -109,6 +124,15 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
     int y_Next = REFERENCE_HEIGHT - 51;
     int x_Add = 30;
     int y_Add = 41;
+
+    // This is a separate control. Its visuals are rendered locally so the
+    // label is centered independently from legacy texture padding.
+    m_BtnServerMenu.ChangeButtonInfo(
+        ServerMenuButtonX,
+        ServerMenuButtonY,
+        ServerMenuButtonWidth,
+        ServerMenuButtonHeight);
+
     m_BtnCShop.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnCShop.ChangeButtonImgState(true, IMAGE_MENU_BTN_CSHOP, true);
     m_BtnCShop.ChangeButtonInfo(x_Next, y_Next, x_Add, y_Add);
@@ -656,6 +680,63 @@ void SEASON3B::CNewUIMainFrameWindow::RenderButtons()
     RenderFriendButton();
 
     m_BtnWindow.Render();
+    RenderServerMenuButton();
+}
+
+void SEASON3B::CNewUIMainFrameWindow::RenderServerMenuButton()
+{
+    const bool active = g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_SERVER_MENU);
+    const BUTTON_STATE state = m_BtnServerMenu.GetBTState();
+    const bool highlighted = active || state == BUTTON_STATE_OVER;
+    const bool pressed = state == BUTTON_STATE_DOWN;
+
+    RenderHudRectangle(
+        ServerMenuButtonX - 1,
+        ServerMenuButtonY + 2,
+        ServerMenuButtonWidth + 2,
+        ServerMenuButtonHeight,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.6f);
+    RenderHudRectangle(
+        ServerMenuButtonX,
+        ServerMenuButtonY,
+        ServerMenuButtonWidth,
+        ServerMenuButtonHeight,
+        highlighted ? 0.72f : 0.28f,
+        highlighted ? 0.53f : 0.36f,
+        highlighted ? 0.16f : 0.42f,
+        0.95f);
+    RenderHudRectangle(
+        ServerMenuButtonX + 1,
+        ServerMenuButtonY + 1,
+        ServerMenuButtonWidth - 2,
+        ServerMenuButtonHeight - 2,
+        pressed ? 0.04f : 0.07f,
+        pressed ? 0.08f : 0.12f,
+        pressed ? 0.11f : 0.16f,
+        0.96f);
+    RenderHudRectangle(
+        ServerMenuButtonX + 5,
+        ServerMenuButtonY + 3,
+        ServerMenuButtonWidth - 10,
+        1,
+        0.78f,
+        0.58f,
+        0.18f,
+        highlighted ? 0.95f : 0.55f);
+
+    g_pRenderText->SetFont(g_hFont);
+    g_pRenderText->SetBgColor(0, 0, 0, 0);
+    g_pRenderText->SetTextColor(highlighted ? 255 : 230, highlighted ? 220 : 230, highlighted ? 130 : 230, 255);
+    g_pRenderText->RenderText(
+        ServerMenuButtonX,
+        ServerMenuButtonY + 7 + (pressed ? 1 : 0),
+        I18N::Game::Menu,
+        ServerMenuButtonWidth,
+        0,
+        RT3_SORT_CENTER);
 }
 
 void SEASON3B::CNewUIMainFrameWindow::RenderCharInfoButton()
@@ -742,6 +823,15 @@ bool SEASON3B::CNewUIMainFrameWindow::UpdateMouseEvent()
         return false;
     }
 
+    if (CheckMouseIn(
+        ServerMenuButtonX,
+        ServerMenuButtonY,
+        ServerMenuButtonWidth,
+        ServerMenuButtonHeight))
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -802,6 +892,12 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
         else if (m_BtnWindow.UpdateMouseEvent() == true)
         {
             g_pNewUISystem->Toggle(SEASON3B::INTERFACE_WINDOW_MENU);
+            PlayBuffer(SOUND_CLICK01);
+            return true;
+        }
+        else if (m_BtnServerMenu.UpdateMouseEvent() == true)
+        {
+            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_SERVER_MENU);
             PlayBuffer(SOUND_CLICK01);
             return true;
         }

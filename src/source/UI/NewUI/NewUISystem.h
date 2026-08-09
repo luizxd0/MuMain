@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/NewUI/NewUI3DRenderMng.h"
 #include "UI/NewUI/HUD/NewUIHotKey.h"
@@ -41,6 +43,7 @@
 #include "UI/NewUI/Events/NewUIBattleSoccerScore.h"
 #include "UI/NewUI/HUD/NewUICommandWindow.h"
 #include "UI/NewUI/Dialogs/NewUIWindowMenu.h"
+#include "UI/NewUI/Dialogs/NewUIServerMenu.h"
 #include "UI/NewUI/Options/NewUIOptionWindow.h"
 #include "UI/NewUI/HUD/NewUIHeroPositionInfo.h"
 #include "UI/NewUI/Dialogs/NewUIHelpWindow.h"
@@ -111,7 +114,7 @@ namespace SEASON3B
         // left-clicked and swallows the mouse so the click can't fall through to
         // the world (which would walk the character). Returns true if handled.
         // Replaces the ptExitBtn1 block that was copy-pasted across the windows.
-        bool HandleFrameCornerClose(const POINT& winPos, DWORD dwKey);
+        bool HandleFrameCornerClose(const POINT& winPos, DWORD dwKey, int frameWidth = 190);
 
         void Enable(DWORD dwKey);
         void Disable(DWORD dwKey);
@@ -186,6 +189,7 @@ namespace SEASON3B
         CNewUICommandWindow* m_pNewCommandWindow;
         CNewUIHeroPositionInfo* m_pNewHeroPositionInfo;
         CNewUIWindowMenu* m_pNewWindowMenu;
+        std::unique_ptr<CNewUIServerMenu> m_pNewServerMenu;
         CNewUIOptionWindow* m_pNewOptionWindow;
         CNewUIHelpWindow* m_pNewHelpWindow;
         CNewUIItemExplanationWindow* m_pNewItemExplanationWindow;
@@ -267,6 +271,8 @@ namespace SEASON3B
         CNewUICommandWindow* GetUI_NewCommandWindow() const;
         CNewUIHeroPositionInfo* GetUI_NewHeroPositionInfo() const;
         CNewUIWindowMenu* GetUI_NewWindowMenu() const;
+        CNewUIServerMenu* GetUI_NewServerMenu() const;
+        CNewUINameWindow* GetUI_NewNameWindow() const;
         CNewUIOptionWindow* GetUI_NewOptionWindow() const;
         CNewUIHelpWindow* GetUI_NewHelpWindow() const;
         CNewUIItemExplanationWindow* GetUI_NewItemExplanationWindow() const;
@@ -353,6 +359,7 @@ namespace SEASON3B
 #define g_pBattleSoccerScore SEASON3B::CNewUISystem::GetInstance()->GetUI_NewBattleSoccerScore()
 #define g_pCommandWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewCommandWindow()
 #define g_pWindowMenu SEASON3B::CNewUISystem::GetInstance()->GetUI_NewWindowMenu()
+#define g_pServerMenu SEASON3B::CNewUISystem::GetInstance()->GetUI_NewServerMenu()
 #define g_pOption SEASON3B::CNewUISystem::GetInstance()->GetUI_NewOptionWindow()
 #define g_pHeroPositionInfo SEASON3B::CNewUISystem::GetInstance()->GetUI_NewHeroPositionInfo()
 #define g_pHelp SEASON3B::CNewUISystem::GetInstance()->GetUI_NewHelpWindow()

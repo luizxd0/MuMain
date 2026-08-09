@@ -11729,6 +11729,9 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     c->m_CursedTempleCurSkillPacket = false;
     c->HealthStatus = -1;
     c->ShieldStatus = -1;
+    c->MonsterLevel = 0;
+    c->MonsterHealth = 0;
+    c->MonsterMaxHealth = 0;
 
     if (Type < MODEL_FACE || Type > MODEL_FACE + 6)
     {

@@ -1,6 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+
+#include <cstdint>
+
 #include "Camera/CameraMove.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -4904,6 +4907,10 @@ void SortInBlockByType()
 
 void DeleteObjectTile(int x, int y)
 {
+    constexpr std::uintptr_t DebugFreedMemoryPattern = sizeof(std::uintptr_t) == 8
+        ? 0xDDDDDDDDDDDDDDDDull
+        : 0xDDDDDDDDull;
+
     for (int i = 0; i < 16; i++)
     {
         for (int j = 0; j < 16; j++)
@@ -4912,7 +4919,7 @@ void DeleteObjectTile(int x, int y)
             OBJECT* o = ob->Head;
             while (1)
             {
-                if (o != NULL && o != (OBJECT*)0xdddddddd)
+                if (o != nullptr && reinterpret_cast<std::uintptr_t>(o) != DebugFreedMemoryPattern)
                 {
                     if (o->Live && (int)(o->Position[0] / TERRAIN_SCALE) == x && (int)(o->Position[1] / TERRAIN_SCALE) == y)
                         DeleteObject(o, ob);

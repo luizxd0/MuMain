@@ -13,6 +13,7 @@ src/Global Release/Main
 _deps
 
 # CMake build directories
+/out/
 /build/
 build-mingw/
 build-linux/

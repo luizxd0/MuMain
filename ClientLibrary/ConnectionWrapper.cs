@@ -86,7 +86,7 @@ public sealed class ConnectionWrapper : IDisposable
         {
             try
             {
-                await this._connection.DisconnectAsync();
+                await this._connection.DisconnectAsync().ConfigureAwait(false);
                 this._connection.Dispose();
             }
             catch (Exception ex)

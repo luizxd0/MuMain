@@ -22,6 +22,7 @@
 #include "Scenes/SceneCore.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
@@ -351,14 +352,32 @@ static int64_t SaturatingAddToUpper(const int64_t current, const int64_t add, in
     return current + add;
 }
 
+static bool IsLoopbackAddress(const std::wstring& address)
+{
+    return address == L"localhost"
+        || address == L"::1"
+        || address.starts_with(L"127.");
+}
+
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", IpAddr, Port);
 
     // todo: generally, it's a bad idea to assume a specific port number (range).
     const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
-    SocketClient = new Connection(IpAddr, Port, isEncrypted, &HandleIncomingPacket);
+    const std::wstring configuredServerAddress = GameConfig::GetInstance().GetServerIP();
+    const wchar_t* effectiveIpAddress = IpAddr;
+    if (isEncrypted && IsLoopbackAddress(configuredServerAddress))
+    {
+        // A connect server normally redirects clients to its public game-server
+        // address. Routers without NAT loopback can't reach that public address
+        // from the host LAN. A client explicitly configured for loopback is a
+        // local client, so keep redirected game/map-server ports on loopback.
+        effectiveIpAddress = configuredServerAddress.c_str();
+    }
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", effectiveIpAddress, Port);
+    SocketClient = new Connection(effectiveIpAddress, Port, isEncrypted, &HandleIncomingPacket);
     if (!SocketClient->IsConnected())
     {
         bResult = FALSE;
@@ -385,7 +404,7 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
         // change, and a direct game-server connection (where ReceiveServerConnect
         // never runs), while skipping the connect server that would otherwise
         // poison the cache and break reconnection (issue #68).
-        ReconnectManager::Instance().CacheServer(IpAddr, Port);
+        ReconnectManager::Instance().CacheServer(effectiveIpAddress, Port);
     }
 
     return bResult;
@@ -3442,6 +3461,12 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     else
     {
         c->HealthStatus = static_cast<float>(Data->HealthStatus) / 250.f;
+    }
+
+    if (IsMonster(c) && c->MonsterMaxHealth > 0 && c->HealthStatus >= 0.f)
+    {
+        c->MonsterHealth = static_cast<DWORD>(
+            (static_cast<double>(c->MonsterMaxHealth) * c->HealthStatus) + 0.5);
     }
 
     if (Data->ShieldStatus == 0xFF)
@@ -13826,6 +13851,228 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
     case 0xA4:
         ReceiveQuestMonKillInfo(ReceiveBuffer);
         break;
+    case 0xF5:
+    {
+        BYTE subCode = 0;
+        if (bIsC1C3)
+        {
+            auto header = safe_cast<PREQUEST_DEFAULT_SUBCODE>(received_span, "server menu byte header");
+            if (header == nullptr)
+            {
+                break;
+            }
+            subCode = header->SubCode;
+        }
+        else
+        {
+            auto header = safe_cast<PHEADER_DEFAULT_SUBCODE_WORD>(received_span, "server menu word header");
+            if (header == nullptr)
+            {
+                break;
+            }
+            subCode = header->SubCode;
+        }
+
+        if (subCode == 0x01)
+        {
+            auto command = safe_cast<PMSG_AVAILABLE_CHAT_COMMAND>(received_span, "available chat command");
+            if (command == nullptr
+                || (command->Count != 0 && command->Index >= command->Count)
+                || g_pServerMenu == nullptr)
+            {
+                break;
+            }
+
+            char commandUtf8[33]{};
+            char nameUtf8[49]{};
+            char descriptionUtf8[257]{};
+            memcpy(commandUtf8, command->Command, sizeof(command->Command));
+            memcpy(nameUtf8, command->Name, sizeof(command->Name));
+            memcpy(descriptionUtf8, command->Description, sizeof(command->Description));
+
+            wchar_t commandWide[33]{};
+            wchar_t nameWide[49]{};
+            wchar_t descriptionWide[257]{};
+            CMultiLanguage::ConvertFromUtf8(commandWide, commandUtf8, sizeof(command->Command));
+            CMultiLanguage::ConvertFromUtf8(nameWide, nameUtf8, sizeof(command->Name));
+            CMultiLanguage::ConvertFromUtf8(descriptionWide, descriptionUtf8, sizeof(command->Description));
+
+            CNewUIServerMenu::CommandEntry entry;
+            entry.command = commandWide;
+            entry.name = nameWide;
+            entry.description = descriptionWide;
+            g_pServerMenu->SetAvailableCommand(command->Index, command->Count, std::move(entry));
+        }
+        else if (!bIsC1C3)
+        {
+            break;
+        }
+        else if (subCode == 0x03)
+        {
+            auto schedule = safe_cast<PMSG_EVENT_SCHEDULE>(received_span, "event schedule");
+            if (schedule == nullptr || schedule->ProtocolVersion != 1 || g_pServerMenu == nullptr)
+            {
+                break;
+            }
+
+            g_pServerMenu->SetEventSchedule(
+                schedule->BloodCastleState,
+                schedule->BloodCastleSeconds,
+                schedule->DevilSquareState,
+                schedule->DevilSquareSeconds,
+                schedule->ChaosCastleState,
+                schedule->ChaosCastleSeconds);
+        }
+        else if (subCode == 0x05)
+        {
+            auto ranking = safe_cast<PMSG_CHARACTER_RANKING_HEADER>(received_span, "character ranking header");
+            if (ranking == nullptr || ranking->ProtocolVersion != 1 ||
+                ranking->Filter > static_cast<BYTE>(CNewUIServerMenu::RankingFilter::MasterLevel) ||
+                ranking->RecordLength != sizeof(PMSG_CHARACTER_RANKING_ENTRY) ||
+                ranking->Count > 10 || g_pServerMenu == nullptr)
+            {
+                break;
+            }
+
+            const std::size_t expectedSize = sizeof(PMSG_CHARACTER_RANKING_HEADER) +
+                (static_cast<std::size_t>(ranking->Count) * ranking->RecordLength);
+            if (received_span.size() < expectedSize)
+            {
+                LogSafeCastSizeMismatch("character ranking entries", received_span.size(), expectedSize);
+                break;
+            }
+
+            std::vector<CNewUIServerMenu::RankingEntry> entries;
+            entries.reserve(ranking->Count);
+            const BYTE* recordData = received_span.data() + sizeof(PMSG_CHARACTER_RANKING_HEADER);
+            for (BYTE index = 0; index < ranking->Count; ++index)
+            {
+                const auto* record = reinterpret_cast<const PMSG_CHARACTER_RANKING_ENTRY*>(
+                    recordData + (index * ranking->RecordLength));
+                char nameUtf8[11]{};
+                memcpy(nameUtf8, record->Name, sizeof(record->Name));
+                wchar_t nameWide[11]{};
+                CMultiLanguage::ConvertFromUtf8(nameWide, nameUtf8, sizeof(record->Name));
+
+                CNewUIServerMenu::RankingEntry entry;
+                entry.name = nameWide;
+                entry.characterClass = record->CharacterClass;
+                entry.level = record->Level;
+                entry.resets = record->Resets;
+                entry.masterLevel = record->MasterLevel;
+                entries.push_back(std::move(entry));
+            }
+
+            g_pServerMenu->SetRankingData(
+                static_cast<CNewUIServerMenu::RankingFilter>(ranking->Filter),
+                std::move(entries));
+        }
+        else if (subCode == 0x08)
+        {
+            auto reset = safe_cast<PMSG_RESET_REQUIREMENTS>(received_span, "reset requirements");
+            if (reset == nullptr || reset->ProtocolVersion != 1 || g_pServerMenu == nullptr)
+            {
+                break;
+            }
+
+            char itemNameUtf8[33]{};
+            memcpy(itemNameUtf8, reset->ItemName, sizeof(reset->ItemName));
+            wchar_t itemNameWide[33]{};
+            CMultiLanguage::ConvertFromUtf8(itemNameWide, itemNameUtf8, sizeof(reset->ItemName));
+
+            CNewUIServerMenu::ResetRequirements requirements;
+            requirements.flags = reset->Flags;
+            requirements.currentLevel = reset->CurrentLevel;
+            requirements.requiredLevel = reset->RequiredLevel;
+            requirements.currentResets = reset->CurrentResets;
+            requirements.nextReset = reset->NextReset;
+            requirements.resetLimit = reset->ResetLimit;
+            requirements.currentZen = reset->CurrentZen;
+            requirements.requiredZen = reset->RequiredZen;
+            requirements.rewardPoints = reset->RewardPoints;
+            requirements.currentItems = reset->CurrentItems;
+            requirements.requiredItems = reset->RequiredItems;
+            requirements.itemName = itemNameWide;
+            g_pServerMenu->SetResetRequirements(std::move(requirements));
+        }
+        else if (subCode == 0x0A)
+        {
+            auto questList = safe_cast<PMSG_MAP_QUEST_LIST_HEADER>(received_span, "map quest list header");
+            if (questList == nullptr || questList->ProtocolVersion != 1 ||
+                questList->MapNumber != static_cast<WORD>(gMapManager.WorldActive) || questList->Count > 61)
+            {
+                break;
+            }
+
+            const std::size_t expectedSize = sizeof(PMSG_MAP_QUEST_LIST_HEADER) +
+                (static_cast<std::size_t>(questList->Count) * sizeof(PMSG_MAP_QUEST_LIST_ENTRY));
+            if (received_span.size() < expectedSize)
+            {
+                LogSafeCastSizeMismatch("map quest list entries", received_span.size(), expectedSize);
+                break;
+            }
+
+            std::vector<DWORD> questIndices;
+            questIndices.reserve(questList->Count);
+            const BYTE* recordData = received_span.data() + sizeof(PMSG_MAP_QUEST_LIST_HEADER);
+            for (BYTE index = 0; index < questList->Count; ++index)
+            {
+                const auto* record = reinterpret_cast<const PMSG_MAP_QUEST_LIST_ENTRY*>(
+                    recordData + (index * sizeof(PMSG_MAP_QUEST_LIST_ENTRY)));
+                questIndices.push_back((static_cast<DWORD>(record->Group) << 16) | record->Number);
+            }
+
+            g_QuestMng.SetMapQuestIndexList(
+                questIndices.empty() ? nullptr : questIndices.data(),
+                static_cast<int>(questIndices.size()));
+        }
+        else if (subCode == 0x0C)
+        {
+            auto status = safe_cast<PMSG_MONSTER_STATUS_HEADER>(received_span, "monster status header");
+            if (status == nullptr || status->ProtocolVersion != 1 ||
+                status->RecordLength != sizeof(PMSG_MONSTER_STATUS_ENTRY) || status->Count > 20)
+            {
+                break;
+            }
+
+            const std::size_t expectedSize = sizeof(PMSG_MONSTER_STATUS_HEADER) +
+                (static_cast<std::size_t>(status->Count) * status->RecordLength);
+            if (received_span.size() < expectedSize)
+            {
+                LogSafeCastSizeMismatch("monster status entries", received_span.size(), expectedSize);
+                break;
+            }
+
+            const BYTE* recordData = received_span.data() + sizeof(PMSG_MONSTER_STATUS_HEADER);
+            for (BYTE index = 0; index < status->Count; ++index)
+            {
+                const auto* record = reinterpret_cast<const PMSG_MONSTER_STATUS_ENTRY*>(
+                    recordData + (index * status->RecordLength));
+                const int characterIndex = FindCharacterIndex(record->Id & 0x7FFF);
+                if (characterIndex == MAX_CHARACTERS_CLIENT)
+                {
+                    continue;
+                }
+
+                CHARACTER* character = &CharactersClient[characterIndex];
+                if (!IsMonster(character))
+                {
+                    continue;
+                }
+
+                character->MonsterLevel = record->Level;
+                character->MonsterHealth = record->CurrentHealth;
+                character->MonsterMaxHealth = record->MaximumHealth;
+                character->HealthStatus = record->MaximumHealth == 0
+                    ? -1.f
+                    : std::clamp(
+                        static_cast<float>(record->CurrentHealth) / static_cast<float>(record->MaximumHealth),
+                        0.f,
+                        1.f);
+            }
+        }
+    }
+    break;
     case 0xF6:
     {
         BYTE bySubcode;
